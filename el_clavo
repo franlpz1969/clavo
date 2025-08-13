@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>El Clavo (Baraja Española)</title>
+    <style>
+        :root{
+            --bg:#0f1220; --panel:#171a2b; --muted:#99a1b3; --text:#e7eaf6;
+            --primary:#6f9cff; --accent:#6fffc3; --danger:#ff6f91; --gold:#ffd166;
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;background:radial-gradient(1200px 700px at 20% -20%,#1a1f3b 5%,#0f1220 70%);color:var(--text)}
+        .container{max-width:1180px;margin:0 auto;padding:24px}
+        h1{font-size:clamp(24px,2.4vw,34px);margin:0 0 16px 0}
+        .grid{display:grid;gap:16px}
+        .grid.cols-2{grid-template-columns: 1fr 1fr}
+        .grid.cols-3{grid-template-columns: repeat(3,1fr)}
+        .card{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+        .row{display:flex;gap:12px;align-items:center}
+        .row.wrap{flex-wrap:wrap}
+        label{font-size:14px;color:var(--muted)}
+        input,select,button{appearance:none;border:none;outline:none}
+        input,select{background:#101426;color:var(--text);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 12px}
+        input[type=number]{width:100px}
+        button{cursor:pointer;background:linear-gradient(180deg,var(--primary),#4e79ff);color:white;border-radius:12px;padding:10px 14px;font-weight:700;transition:.2s transform,.2s box-shadow}
+        button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(79,121,255,.35)}
+        button.ghost{background:transparent;border:1px solid rgba(255,255,255,.14)}
+        button.danger{background:linear-gradient(180deg,var(--danger),#ff4f78)}
+        .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-size:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:var(--muted)}
+        .table{position:relative;min-height:460px;border-radius:16px;background:linear-gradient(180deg,#152238,#0f172a);overflow:hidden}
+        .hand{display:flex;gap:8px;flex-wrap:wrap; perspective: 600px;}
+        .cardUI{position:relative;width:64px;height:96px;border-radius:10px;background:#fff;color:#111;border:2px solid #d7d7d7;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;user-select:none;box-shadow:0 6px 14px rgba(0,0,0,.25);transition:.15s transform, .15s filter}
+        .cardUI.small{width:54px;height:80px;font-size:16px}
+        .cardUI.playable{outline:3px solid var(--accent);filter:saturate(1.1);cursor:pointer}
+        .cardUI.playable:hover{transform:translateY(-10px) scale(1.05);}
+        .cardUI.dim{filter:grayscale(0.5) opacity(.65)}
+        .card-bg{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://deckofcardsapi.com/static/img/spanish-deck.png'); /* URL a un sprite sheet de cartas españolas */
+            background-size: 1000% 400%;
+            border-radius: 8px;
+        }
+        .cardUI.back .card-bg{background-position: -464px -290px;}
+        .r-1.s-bastos .card-bg {background-position: 0 0;}
+        .r-2.s-bastos .card-bg {background-position: -64px 0;}
+        .r-3.s-bastos .card-bg {background-position: -128px 0;}
+        .r-4.s-bastos .card-bg {background-position: -192px 0;}
+        .r-5.s-bastos .card-bg {background-position: -256px 0;}
+        .r-6.s-bastos .card-bg {background-position: -320px 0;}
+        .r-7.s-bastos .card-bg {background-position: -384px 0;}
+        .r-10.s-bastos .card-bg {background-position: -448px 0;}
+        .r-11.s-bastos .card-bg {background-position: -512px 0;}
+        .r-12.s-bastos .card-bg {background-position: -576px 0;}
+
+        .r-1.s-copas .card-bg {background-position: 0 -97px;}
+        .r-2.s-copas .card-bg {background-position: -64px -97px;}
+        .r-3.s-copas .card-bg {background-position: -128px -97px;}
+        .r-4.s-copas .card-bg {background-position: -192px -97px;}
+        .r-5.s-copas .card-bg {background-position: -256px -97px;}
+        .r-6.s-copas .card-bg {background-position: -320px -97px;}
+        .r-7.s-copas .card-bg {background-position: -384px -97px;}
+        .r-10.s-copas .card-bg {background-position: -448px -97px;}
+        .r-11.s-copas .card-bg {background-position: -512px -97px;}
+        .r-12.s-copas .card-bg {background-position: -576px -97px;}
+        
+        .r-1.s-espadas .card-bg {background-position: 0 -194px;}
+        .r-2.s-espadas .card-bg {background-position: -64px -194px;}
+        .r-3.s-espadas .card-bg {background-position: -128px -194px;}
+        .r-4.s-espadas .card-bg {background-position: -192px -194px;}
+        .r-5.s-espadas .card-bg {background-position: -256px -194px;}
+        .r-6.s-espadas .card-bg {background-position: -320px -194px;}
+        .r-7.s-espadas .card-bg {background-position: -384px -194px;}
+        .r-10.s-espadas .card-bg {background-position: -448px -194px;}
+        .r-11.s-espadas .card-bg {background-position: -512px -194px;}
+        .r-12.s-espadas .card-bg {background-position: -576px -194px;}
+        
+        .r-1.s-oros .card-bg {background-position: 0 -291px;}
+        .r-2.s-oros .card-bg {background-position: -64px -291px;}
+        .r-3.s-oros .card-bg {background-position: -128px -291px;}
+        .r-4.s-oros .card-bg {background-position: -192px -291px;}
+        .r-5.s-oros .card-bg {background-position: -256px -291px;}
+        .r-6.s-oros .card-bg {background-position: -320px -291px;}
+        .r-7.s-oros .card-bg {background-position: -384px -291px;}
+        .r-10.s-oros .card-bg {background-position: -448px -291px;}
+        .r-11.s-oros .card-bg {background-position: -512px -291px;}
+        .r-12.s-oros .card-bg {background-position: -576px -291px;}
+
+        .fly{animation:fly .35s ease-out forwards}
+        @keyframes fly{from{transform:translateY(30px) scale(.9);opacity:.2}to{transform:translateY(0) scale(1);opacity:1)}
+        .pop{animation:pop .28s ease-out}
+        @keyframes pop{from{transform:scale(.9)}to{transform:scale(1)}}
+        .area{padding:12px;border:1px dashed rgba(255,255,255,.12);border-radius:12px}
+        .area-title{font-size:12px;color:var(--muted);margin-bottom:8px}
+        .trick{display:flex;gap:10px;align-items:center;min-height:120px}
+        .status{display:flex;gap:10px;flex-wrap:wrap}
+        .status .tag{padding:6px 10px;border-radius:999px;background:#0e1324;border:1px solid rgba(255,255,255,.08);font-size:12px;color:var(--muted)}
+        .leader{outline:3px dashed var(--gold);outline-offset:4px}
+        .winner{outline:3px solid var(--gold);box-shadow:0 0 0 3px rgba(255,209,102,.2) inset}
+        .players{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+        .playerPanel{background:#0e1324;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
+        .playerHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+        .playerHeader .name{font-weight:800}
+        .scoreboard{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+        .scoreboard .cell{background:#0e1324;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px;text-align:center}
+        .log{max-height:200px;overflow:auto;font-size:12px;background:#0e1324;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
+        .muted{color:var(--muted)}
+        .hidden{display:none !important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="pop">🃏 El Clavo (Baraja Española)</h1>
+        <div class="grid cols-2">
+            <section class="card">
+                <div class="row wrap">
+                    <label>Jugadores</label>
+                    <select id="numPlayers">
+                        <option>2</option>
+                        <option selected>3</option>
+                        <option>4</option>
+                    </select>
+                    <label>IA</label>
+                    <select id="bots">
+                        <option value="0">Sin IA</option>
+                        <option value="1">1 bot</option>
+                        <option value="2" selected>2 bots</option>
+                        <option value="3">3 bots</option>
+                    </select>
+                </div>
+                <div class="row wrap" style="margin-top:8px">
+                    <label>Rondas a jugar</label>
+                    <input id="roundsToPlay" type="number" min="1" max="20" value="5"/>
+                    <button id="btnNew">Nueva partida</button>
+                    <button id="btnReset" class="ghost">Reiniciar</button>
+                    <button id="btnNextRound" class="ghost hidden">Siguiente ronda</button>
+                </div>
+                <div class="row wrap" style="margin-top:8px">
+                    <span class="pill">As de Oros = la más alta</span>
+                    <span class="pill">Ases de otros palos = los más bajos</span>
+                    <span class="pill">Predicción = bazas ganadas con la carta más baja</span>
+                </div>
+            </section>
+            <section class="card">
+                <div class="row wrap">
+                    <label>Modo red (WebSocket)</label>
+                    <input id="wsUrl" placeholder="ws://servidor:puerto" style="flex:1" />
+                    <input id="roomId" placeholder="sala-123" style="width:140px" />
+                    <select id="role"><option value="host" selected>Anfitrión</option><option value="client">Cliente</option></select>
+                    <button id="btnConnect" class="ghost">Conectar</button>
+                </div>
+                <p class="muted" style="margin-top:8px">El anfitrión es la autoridad del estado. Los clientes reciben sincronizaciones y envían acciones (predicción/jugada). Requiere un servidor WebSocket sencillo.</p>
+            </section>
+        </div>
+        <section id="status" class="status" style="margin:16px 0"></section>
+        <div class="grid">
+            <section class="card table">
+                <div class="area">
+                    <div class="area-title">Baza en curso</div>
+                    <div id="trick" class="trick"></div>
+                </div>
+                <div class="area" style="margin-top:12px">
+                    <div class="area-title">Mano del jugador actual</div>
+                    <div id="currentHand" class="hand"></div>
+                </div>
+            </section>
+            <section class="card">
+                <div class="area-title">Jugadores</div>
+                <div id="players" class="players"></div>
+            </section>
+            <section class="card">
+                <div class="area-title">Marcador (Clavos)</div>
+                <div id="scoreboard" class="scoreboard"></div>
+            </section>
+            <section class="card">
+                <div class="area-title">Registro</div>
+                <div id="log" class="log"></div>
+            </section>
+        </div>
+    </div>
+    <script>
+        // Palos y rangos de la baraja española
+        const SUITS = ['oros','copas','espadas','bastos'];
+        const RANKS = ['1','2','3','4','5','6','7','10','11','12'];
+        const RANK_VALUE = Object.fromEntries(RANKS.map((r,i)=>[r,i]));
+
+        const el = sel => document.querySelector(sel);
+        const $ = sel => Array.from(document.querySelectorAll(sel));
+        const log = (msg)=>{const d=el('#log');const t=document.createElement('div');t.innerHTML=msg;d.prepend(t)}
+
+        class Card{
+            constructor(suit,rank){
+                this.suit=suit;
+                this.rank=rank;
+            }
+            toString(){
+                return `${this.rank} de ${this.suit}`;
+            }
+            value(){
+                // As de Oros es la más alta (valor 9)
+                if(this.rank === '1' && this.suit === 'oros') return 9;
+                // Los demás Ases son bajos (valor 0)
+                if(this.rank === '1') return 0;
+                // Sota, Caballo, Rey
+                if(this.rank === '10') return 7;
+                if(this.rank === '11') return 8;
+                if(this.rank === '12') return 9;
+                return RANK_VALUE[this.rank];
+            }
+        }
+        
+        class Deck{
+            constructor(){
+                this.cards=[];
+                SUITS.forEach(s=>RANKS.forEach(r=>this.cards.push(new Card(s,r))));
+            }
+            shuffle(){
+                for(let i=this.cards.length-1;i>0;i--){
+                    const j=Math.floor(Math.random()*(i+1));
+                    [this.cards[i],this.cards[j]]=[this.cards[j],this.cards[i]]
+                }
+                return this;
+            }
+            deal(nPlayers,cardsPer){
+                const hands=Array.from({length:nPlayers},()=>[]);
+                for(let c=0;c<cardsPer;c++){
+                    for(let p=0;p<nPlayers;p++){
+                        if (this.cards.length > 0) {
+                            hands[p].push(this.cards.pop());
+                        }
+                    }
+                }
+                return hands;
+            }
+        }
+
+        class Player{
+            constructor(id,name,isBot=false){
+                this.id=id;
+                this.name=name;
+                this.isBot=isBot;
+                this.hand=[];
+                this.prediction=null;
+                this.tricks=0;
+                this.clavos=0;
+            }
+            lowestCard(){
+                // As de Oros no es la más baja
+                return this.hand.slice().sort((a,b)=>{
+                    if(a.rank === '1' && a.suit === 'oros') return 1;
+                    if(b.rank === '1' && b.suit === 'oros') return -1;
+                    return a.value()-b.value()
+                })[0];
+            }
+        }
+        
+        class Game{
+            constructor(){
+                this.players=[];this.turn=0;this.leader=0;this.trick=[];this.trickHistory=[];
+                this.state='idle'; // idle|predict|play|scoring|between
+                this.cardsPer=2;this.round=0;this.roundsToPlay=5;
+                this.ws=null;this.wsConnected=false;this.role='host';this.roomId='';
+            }
+            setup(opts){
+                const {nPlayers=3,bots=2,roundsToPlay=5}=opts;
+                this.roundsToPlay=roundsToPlay;
+                this.players=Array.from({length:nPlayers},(_,i)=> new Player(i,`Jugador ${i+1}`, i < bots));
+                this.players.forEach(p=>{p.clavos=0});
+                this.round=0;
+                this.newRound();
+            }
+            newRound(){
+                this.round++;
+                this.cardsPer = this.round + 1; // 2, 3, 4, ...
+                this.turn=0; this.leader=0; this.trick=[]; this.trickHistory=[]; this.state='predict';
+                const deck=new Deck().shuffle();
+                const hands=deck.deal(this.players.length,this.cardsPer);
+                this.players.forEach((p,i)=>{p.hand=hands[i].sort((a,b)=>a.suit.localeCompare(b.suit)||a.value()-b.value());p.tricks=0;p.prediction=null});
+                log(`<span class="muted">Ronda <b>${this.round}</b> de ${this.roundsToPlay}. Cartas por jugador: ${this.cardsPer}</span>`);
+
+                this.players.forEach(p=>{
+                    const low = p.lowestCard();
+                    const heuristic = Math.max(0, Math.round((low.value()/12)*(this.cardsPer/2))); // Heurística simple para bots
+                    if(p.isBot){
+                        p.prediction=heuristic;
+                        log(`🤖 ${p.name} predice <b>${p.prediction}</b>`);
+                    } else {
+                        if(p.prediction===null){ p.prediction = heuristic; log(`📝 Sugerencia para ${p.name}: <b>${p.prediction}</b> – puedes ajustarla`)}
+                    }
+                });
+
+                if(this.allPredicted()) { this.startPlay(); } else { this.syncAll(); this.render(); }
+            }
+            allPredicted(){
+                return this.players.every(p=>p.prediction!==null);
+            }
+            startPlay(){
+                this.state='play';
+                // El jugador a la derecha del crupier inicia (crupie es el jugador 0, la derecha es el último)
+                this.turn = (this.players.length - 1);
+                this.leader = this.turn;
+                log(`➡️ Empieza <b>${this.players[this.turn].name}</b>`);
+                this.syncAll();
+                this.render();
+            }
+            playCard(playerIndex, cardIndex){
+                const p=this.players[playerIndex];
+                if(this.state!=='play' || this.turn!==playerIndex) return;
+                const card=p.hand[cardIndex]; if(!card) return; if(!this.isPlayable(p,card)) return;
+                p.hand.splice(cardIndex,1);
+                this.trick.push({player:playerIndex,card});
+                log(`${p.name} juega <b>${card}</b>`);
+                if(this.trick.length===this.players.length){
+                    setTimeout(()=>{this.resolveTrick(); this.syncAll(); this.render();}, 200);
+                }else{
+                    this.turn=(this.turn+1)%this.players.length; this.syncAll(); this.render();
+                }
+            }
+            leadSuit(){return this.trick.length?this.trick[0].card.suit:null}
+            isPlayable(player,card){const ls=this.leadSuit(); if(!ls) return true; if(card.suit===ls) return true; const hasLead = player.hand.some(c=>c.suit===ls); return !hasLead}
+            resolveTrick(){
+                let winner = { player: null, card: null };
+                const lead = this.leadSuit();
+                
+                // Excepción: si el As de Oros está en la baza, es el ganador
+                const asOros = this.trick.find(t => t.card.rank === '1' && t.card.suit === 'oros');
+                if (asOros) {
+                    winner.player = asOros.player;
+                    winner.card = asOros.card;
+                } else {
+                    const pool = this.trick.filter(t => t.card.suit === lead);
+                    pool.sort((a, b) => b.card.value() - a.card.value());
+                    winner.player = pool[0].player;
+                    winner.card = pool[0].card;
+                }
+
+                this.players[winner.player].tricks++;
+                this.trickHistory.push({trick:this.trick.slice(),winner:winner.player});
+                log(`🏅 Baza para <b>${this.players[winner.player].name}</b> con ${winner.card}`);
+                this.trick=[]; this.turn=this.leader=winner.player;
+                if(this.players.every(p=>p.hand.length===0)) this.finishRound();
+            }
+            finishRound(){
+                this.state='scoring';
+                const summary = this.players.map(p => {
+                    const clavos = Math.abs(p.tricks - (p.prediction ?? 0));
+                    p.clavos += clavos;
+                    return `${p.name} ganó ${p.tricks} bazas, predijo ${p.prediction??'—'} → <b>${clavos} clavos</b>`;
+                }).join(' · ');
+                log(`🎉 Fin de ronda ${this.round}. ${summary}`);
+                this.updateScoreboard();
+                this.state='between';
+                this.syncAll();
+                this.render();
+                if(this.round < this.roundsToPlay){ el('#btnNextRound').classList.remove('hidden'); }
+                else { this.endMatch(); }
+            }
+            endMatch(){
+                const minClavos=Math.min(...this.players.map(p=>p.clavos));
+                const champs=this.players.filter(p=>p.clavos===minClavos).map(p=>p.name).join(', ');
+                log(`🥇 Partida terminada. Campeón/es: <b>${champs}</b> con ${minClavos} clavos`);
+            }
+            nextRound(){ el('#btnNextRound').classList.add('hidden'); this.newRound(); }
+            render(){ this.renderStatus(); this.renderPlayers(); this.renderHands(); this.renderTrick(); this.updateScoreboard(); }
+            renderStatus(){
+                const s=el('#status');
+                const tags=[`Estado: <b>${this.state}</b>`,`Ronda: <b>${this.round}/${this.roundsToPlay}</b>`,`Turno: <b>${this.players[this.turn]?.name ?? '—'}</b>`];
+                s.innerHTML=tags.map(t=>`<span class="tag">${t}</span>`).join('');
+            }
+            renderPlayers(){
+                const wrap=el('#players'); wrap.innerHTML='';
+                this.players.forEach((p,i)=>{
+                    const panel=document.createElement('div'); panel.className='playerPanel'+(i===this.turn?' leader':'');
+                    panel.innerHTML=`
+                        <div class="playerHeader">
+                            <div class="name">${p.name} ${p.isBot?'🤖':''}</div>
+                            <div style="display:flex;gap:8px;align-items:center">
+                                <div class="pill">Bazas: <b>${p.tricks}</b></div>
+                                <div class="pill">Clavos: <b>${p.clavos}</b></div>
+                            </div>
+                        </div>
+                        <div class="row wrap">
+                            <label>Predicción</label>
+                            <input data-pred="${i}" type="number" min="0" max="${this.cardsPer}" value="${p.prediction??''}" ${p.isBot||this.state!=='predict'?'disabled':''} />
+                            <span class="muted">Baja: <b>${p.lowestCard()?.toString()||'—'}</b></span>
+                            ${!p.isBot && this.state==='predict' ? '<button class="ghost" data-confirm="'+i+'">Fijar</button>' : ''}
+                        </div>
+                        <div class="area" style="margin-top:8px">
+                            <div class="area-title">Mano (${p.hand.length})</div>
+                            <div class="hand">${p.hand.map(c=>renderCard(c,true)).join('')}</div>
+                        </div>`;
+                    wrap.appendChild(panel);
+                })
+                $('input[data-pred]').forEach(inp=>{
+                    inp.addEventListener('change',e=>{
+                        const idx=+e.target.getAttribute('data-pred');
+                        const val=Math.max(0,Math.min(this.cardsPer,parseInt(e.target.value||'0',10)));
+                        this.players[idx].prediction=val; if(this.allPredicted() && this.state==='predict'){ this.startPlay(); } else { this.syncAll(); }
+                    })
+                })
+                $('button[data-confirm]').forEach(btn=>{
+                    btn.addEventListener('click',e=>{
+                        const idx=+e.target.getAttribute('data-pred');
+                        if(this.players[idx].prediction==null) return;
+                        log(`📝 ${this.players[idx].name} predice <b>${this.players[idx].prediction}</b>`);
+                        if(this.allPredicted()){this.startPlay()} else {this.syncAll(); this.render()}
+                    })
+                });
+                $('input[data-pred]').forEach(inp=>{
+                    inp.addEventListener('keydown',e=>{
+                        if(e.key==='Enter'){ const idx=+e.target.getAttribute('data-pred'); if(this.players[idx].prediction!=null){ if(this.allPredicted()){ this.startPlay() } } }
+                    })
+                })
+            }
+            renderHands(){
+                const area=el('#currentHand'); area.innerHTML='';
+                if(this.state!=='play'){area.innerHTML='<span class="muted">A la espera de predicciones o puntuación…</span>';return}
+                const p=this.players[this.turn];
+                p.hand.forEach((card,idx)=>{
+                    const div=document.createElement('div');
+                    const playable=this.isPlayable(p,card);
+                    div.className='cardUI s-'+card.suit+' r-'+card.rank+(playable?' playable fly':' dim');
+                    div.innerHTML=`<div class="card-bg"></div>`;
+                    if(playable){div.addEventListener('click',()=>{
+                        this.sendAction({type:'play',player:this.turn,cardIdx:idx});
+                        this.playCard(this.turn,idx);
+                    })}
+                    area.appendChild(div);
+                })
+            }
+            renderTrick(){
+                const t=el('#trick'); t.innerHTML='';
+                this.trick.forEach(ply=>{
+                    const div=document.createElement('div'); div.innerHTML=renderCard(ply.card,false);
+                    const cardEl=div.firstChild; cardEl.classList.add('fly');
+                    const tag=document.createElement('div'); tag.className='muted'; tag.style.textAlign='center'; tag.textContent=this.players[ply.player].name;
+                    const box=document.createElement('div'); box.appendChild(cardEl); box.appendChild(tag);
+                    t.appendChild(box);
+                })
+            }
+            updateScoreboard(){
+                const sb=el('#scoreboard'); if(!sb) return; sb.innerHTML='';
+                const head=["Jugador","Clavos","Pred","Bazas","Ronda"].concat([]);
+                head.forEach(h=>{const c=document.createElement('div');c.className='cell pill';c.textContent=h;sb.appendChild(c)})
+                this.players.forEach((p,i)=>{
+                    [p.name,p.clavos,(p.prediction??'—'),p.tricks,this.round].forEach(v=>{const c=document.createElement('div');c.className='cell';c.textContent=v;sb.appendChild(c)})
+                })
+            }
+            connect(url,roomId,role){
+                this.role=role; this.roomId=roomId;
+                try{
+                    const ws=new WebSocket(url);
+                    ws.onopen=()=>{this.ws=ws;this.wsConnected=true;log('🔌 Conectado a servidor'); this.ws.send(JSON.stringify({type:'join',room:roomId,role})); this.syncAll(true)}
+                    ws.onmessage=(ev)=>{ try{ const msg=JSON.parse(ev.data); this.onNetMessage(msg) }catch(e){ log('<span class=muted>WS:</span> mensaje no JSON') } }
+                    ws.onclose=()=>{this.wsConnected=false;log('❌ Conexión cerrada')}
+                    ws.onerror=(e)=>{this.wsConnected=false;log('⚠️ Error de WebSocket');console.error(e)}
+                }catch(e){ alert('No se pudo conectar'); }
+            }
+            onNetMessage(msg){
+                if(msg.room!==this.roomId) return;
+                if(msg.type==='state' && this.role==='client'){
+                    Object.assign(this, deserializeState(msg.payload));
+                    this.render();
+                }
+                if(msg.type==='action' && this.role==='host'){
+                    if(msg.payload.type==='predict'){
+                        const {player,val}=msg.payload; this.players[player].prediction=val; log(`📡 Predicción de cliente: J${player+1}=${val}`)
+                        if(this.allPredicted() && this.state==='predict') this.startPlay(); else this.syncAll();
+                    }
+                    if(msg.payload.type==='play'){
+                        const {player,cardIdx}=msg.payload; if(player===this.turn) this.playCard(player,cardIdx); this.syncAll();
+                    }
+                }
+            }
+            sendAction(payload){ if(this.wsConnected) this.ws.send(JSON.stringify({type:'action',room:this.roomId,payload})) }
+            syncAll(force=false){ if(this.role!=='host' || !this.wsConnected) return; const payload=serializeState(this); this.ws.send(JSON.stringify({type:'state',room:this.roomId,payload})) }
+        }
+        function renderCard(card,small){
+            return `<div class="cardUI ${small?'small':''} s-${card.suit} r-${card.rank}">\n  <div class="card-bg"></div>\n</div>`
+        }
+        function serializeState(game){
+            return {
+                players: game.players.map(p=>({id:p.id,name:p.name,isBot:p.isBot,hand:p.hand.map(c=>({s:c.suit,r:c.rank})),prediction:p.prediction,tricks:p.tricks,clavos:p.clavos})),
+                turn:game.turn,leader:game.leader,trick:game.trick.map(t=>({player:t.player,card:{s:t.card.suit,r:t.card.rank}})),
+                trickHistory:game.trickHistory.map(x=>({winner:x.winner,trick:x.trick.map(t=>({player:t.player,card:new Card(t.card.s,t.card.r)}))})),
+                state:game.state,cardsPer:game.cardsPer,round:game.round,roundsToPlay:game.roundsToPlay,
+            }
+        }
+        function deserializeState(obj){
+            const g=new Game();
+            g.players=obj.players.map(p=>{const pl=new Player(p.id,p.name,p.isBot); pl.hand=p.hand.map(c=>new Card(c.s,c.r)); pl.prediction=p.prediction; pl.tricks=p.tricks; pl.clavos=p.clavos; return pl});
+            g.turn=obj.turn; g.leader=obj.leader; g.trick=obj.trick.map(t=>({player:t.player,card:new Card(t.card.s,t.card.r)}));
+            g.trickHistory=obj.trickHistory.map(x=>({winner:x.winner,trick:x.trick.map(t=>({player:t.player,card:new Card(t.card.s,t.card.r)}))}));
+            g.state=obj.state; g.cardsPer=obj.cardsPer; g.round=obj.round; g.roundsToPlay=obj.roundsToPlay;
+            g.ws=game.ws; g.wsConnected=game.wsConnected; g.role=game.role; g.roomId=game.roomId;
+            return g;
+        }
+        const game=new Game();
+        el('#btnNew').addEventListener('click',()=>{
+            game.setup({
+                nPlayers: parseInt(el('#numPlayers').value,10),
+                bots: parseInt(el('#bots').value,10),
+                roundsToPlay: parseInt(el('#roundsToPlay').value,10)
+            });
+        })
+        el('#btnReset').addEventListener('click',()=>{ el('#log').innerHTML=''; Object.assign(game,new Game()); game.render(); })
+        el('#btnNextRound').addEventListener('click',()=> game.nextRound())
+        document.addEventListener('change',(e)=>{
+            const target=e.target; if(!(target instanceof HTMLInputElement)) return;
+            if(target.matches('input[data-pred]') && game.role==='client'){
+                const idx=+target.getAttribute('data-pred'); const val=Math.max(0,Math.min(game.cardsPer,parseInt(target.value||'0',10)));
+                game.sendAction({type:'predict',player:idx,val});
+            }
+        })
+        el('#btnConnect').addEventListener('click',()=>{
+            const url=el('#wsUrl').value.trim(); const room=el('#roomId').value.trim()||'sala-1'; const role=el('#role').value;
+            if(!url){alert('Introduce la URL de WebSocket');return}
+            game.connect(url,room,role);
+        })
+        game.render();
+    </script>
+</body>
+</html>
